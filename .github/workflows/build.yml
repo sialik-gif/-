@@ -1,0 +1,22 @@
+name: Build APK
+on: [push, workflow_dispatch]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip LiteLauncher.zip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+      - run: gradle assembleRelease
+        working-directory: LiteLauncher
+      - run: gh release create v${{ github.run_number }} LiteLauncher/app/build/outputs/apk/release/*.apk --title "Lite Launcher"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
